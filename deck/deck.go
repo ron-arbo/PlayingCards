@@ -1,11 +1,24 @@
 package deck
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Card struct {
 	Value int
 	Suit string
 }
+
+func (c Card) String() string {
+	return fmt.Sprintf("%v of %v \n", c.Value, c.Suit)
+}
+
+// ByVal implements the sort.Interface for []Card based on the value field
+type ByVal []Card
+func (a ByVal) Len() int           { return len(a) }
+func (a ByVal) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByVal) Less(i, j int) bool { return a[i].Value < a[j].Value }
 
 func New() []Card {
 	// Create card slice
@@ -23,25 +36,25 @@ func New() []Card {
 	return cardDeck
 }
 
-//printCard prints the attribtutes of a given card
-func PrintCard(inputCard Card) string {
-	return fmt.Sprintf("Value: %v -- Suit: %v", inputCard.Value, inputCard.Suit)
+// Filter filters cards out based on a function that the user must provide
+func Filter(f func(c Card) bool, inputDeck []Card) []Card {
+	var returnDeck []Card
+	for _, v := range inputDeck {
+		if !f(v) {
+			returnDeck = append(returnDeck, v)
+		}
+	}
+	return returnDeck
 }
 
-// printDeck prints the contents of a given card slice (deck)
-func PrintDeck(inputDeck []Card) {
-	for _, v := range inputDeck {
-		fmt.Println(PrintCard(v))
-	}
-}
+//Shuffle will shuffle a current deck and return a new deck
+func Shuffle(inputDeck []Card) []Card {
+	returnDeck := make([]Card, len(inputDeck))
 
-// filterCards filters out cards that don't meet a given value threshold
-func FilterCards(inputDeck []Card, thresh int) []Card {
-	newDeck := make([]Card, 0)
-	for _, v := range inputDeck {
-		if v.Value >= thresh {
-			newDeck = append(newDeck, v)
-		}	
+	// Returns a slice of indexes randomly permuted
+	perm := rand.Perm(len(inputDeck))
+	for i, v := range perm {
+		returnDeck[i] = inputDeck[v]
 	}
-	return newDeck
+	return returnDeck
 }
